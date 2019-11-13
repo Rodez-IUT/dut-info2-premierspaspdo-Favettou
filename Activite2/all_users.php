@@ -3,6 +3,18 @@
 <head>
 	<meta charset="utf-8">
 	<title>All users</title>
+	<href link="style.css" rel="stylesheet">
+	<style>
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+        th, td {
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+    </style>
 </head>
 <body>
 	<h1> All users </h1>
@@ -32,12 +44,21 @@
 			throw new PDOException($e->getMessage(), (int)$e->getCode());
 		}
 		
-		$stmt = $pdo->query('SELECT * FROM users JOIN status ON users.status_id = status.id ORDER BY username ASC');
-		
-		while ($row = $stmt->fetch())
-		{
-			echo "<p>" . $row['id'] . "     " .$row['username'] . "     " . $row['email'] . "     " . $row['name']  . "</br>" . "</p>";
+		$stmt = $pdo->query('SELECT users.id as user_id, username, email, s.name as status FROM users JOIN status s ON users.status_id = s.id ORDER BY username ASC');
+	?>
+		<table> 
+			<tr class=\"entete\"> 
+				<th> Id </th> 
+				<th> Username </th> 
+				<th> Email </th> 
+				<th> Status </th> 
+			</tr>
+	<?php
+		while ($row = $stmt->fetch()) {
+			echo "<tr> <td>" . $row['user_id'] . "</td> <td>" .$row['username'] . "</td> <td>" . $row['email']; 
+			echo "</td> <td>" . $row['status']  . "</td> </tr>";
 		}
+		echo "</table>";
 	?>
 </body>
 </html>
