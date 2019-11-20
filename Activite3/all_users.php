@@ -17,6 +17,12 @@
     </style>
 </head>
 <body>
+
+	<?php
+		function get($name) {
+			return isset($_GET[$name]) ? $_GET[$name] : null;
+		}
+	?>
 	<h1> All users </h1>
 	
 	<?php
@@ -43,8 +49,22 @@
 		} catch (PDOException $e) {
 			throw new PDOException($e->getMessage(), (int)$e->getCode());
 		}
-		
-		$stmt = $pdo->query('SELECT users.id as user_id, username, email, s.name as status FROM users JOIN status s ON users.status_id = s.id WHERE username LIKE \'e%\' AND s.id = \'2\' ORDER BY username ASC');
+	?>
+		<form action="all_users.php" method="POST">
+			<p> Un utilisateur dont la première lettre est 
+				<input type="text" id="premiereLettre" name="premiereLettre" <?php echo get("premiereLettre") ?> >
+				et dont le statut est 
+				<select name="statut" id="statut">
+					<option value="2" <?php if (get(name:"statut") == 2) echo 'selected' ?> >Active Account</option>
+					<option value="1" <?php if (get(name:"statut") == 1) echo 'selected' ?> >Waiting for account validation</option>
+				</select>
+			 <input type="submit" value="OK">
+			</p>
+		</form>
+	<?php	
+		$lettre = htmlspecialchars(get(name:"premiereLettre"));
+		$statut = (int)get(name:"statut");
+		$stmt = $pdo->query('SELECT users.id as user_id, username, email, s.name as status FROM users JOIN status s ON users.status_id = s.id WHERE username LIKE \'$lettre%\' AND s.id = \'$statut\' ORDER BY username ASC');
 	?>
 		<table> 
 			<tr class=\"entete\"> 
