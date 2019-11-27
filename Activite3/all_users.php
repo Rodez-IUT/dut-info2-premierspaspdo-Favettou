@@ -1,10 +1,9 @@
 <!DOCTYPE html>
-<html>
+<html lang="fr">
 <head>
-	<meta charset="utf-8">
-	<title>All users</title>
-	<href link="style.css" rel="stylesheet">
-	<style>
+    <meta charset="UTF-8">
+    <title>All users</title>
+    <style>
         table {
             border-collapse: collapse;
             width: 100%;
@@ -18,67 +17,65 @@
 </head>
 <body>
 
-	<?php
-		function get($name) {
-			return isset($_GET[$name]) ? $_GET[$name] : null;
-		}
-	?>
-	<h1> All users </h1>
-	
-	<?php
-	
-		/* initialisation des différentes variables du PDO */
-		$host = 'localhost';
-		$db   = 'my_activities';
-		$user = 'root';
-		$pass = 'root';
-		$charset = 'utf8';
-		
-		/* définition du PDO */
-		$dsn = "mysql:host=$host;dbname=$db;charset=$charset";
-		
-		$options = [
-			PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
-			PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-			PDO::ATTR_EMULATE_PREPARES   => false,
-		];
-		
-		try {
-			/* création de l'accès à la BD */
-			$pdo = new PDO($dsn, $user, $pass, $options);
-		} catch (PDOException $e) {
-			throw new PDOException($e->getMessage(), (int)$e->getCode());
-		}
-	?>
-		<form action="all_users.php" method="POST">
-			<p> Un utilisateur dont la première lettre est 
-				<input type="text" id="premiereLettre" name="premiereLettre" <?php echo get("premiereLettre") ?> >
-				et dont le statut est 
-				<select name="statut" id="statut">
-					<option value="2" <?php if (get(name:"statut") == 2) echo 'selected' ?> >Active Account</option>
-					<option value="1" <?php if (get(name:"statut") == 1) echo 'selected' ?> >Waiting for account validation</option>
-				</select>
-			 <input type="submit" value="OK">
-			</p>
-		</form>
-	<?php	
-		$lettre = htmlspecialchars(get(name:"premiereLettre"));
-		$statut = (int)get(name:"statut");
-		$stmt = $pdo->query('SELECT users.id as user_id, username, email, s.name as status FROM users JOIN status s ON users.status_id = s.id WHERE username LIKE \'$lettre%\' AND s.id = \'$statut\' ORDER BY username ASC');
-	?>
-		<table> 
-			<tr class=\"entete\"> 
-				<th> Id </th> 
-				<th> Username </th> 
-				<th> Email </th> 
-				<th> Status </th> 
-			</tr>
-	<?php
-		while ($row = $stmt->fetch()) {
-			echo "<tr> <td>" . $row['user_id'] . "</td> <td>" .$row['username'] . "</td> <td>" . $row['email']; 
-			echo "</td> <td>" . $row['status']  . "</td> </tr>";
-		}
-		echo "</table>";
-	?>
+<?php
+$host = 'localhost';
+$db = 'my_activities';
+$user = 'root';
+$pass = 'root';
+$charset = 'utf8mb4';
+$dsn = "mysql:host=$host;port=$port;dbname=$db;charset=$charset";
+$options = [
+    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+    PDO::ATTR_EMULATE_PREPARES => false,
+];
+try {
+    $pdo = new PDO($dsn, $user, $pass, $options);
+} catch (PDOException $e) {
+    echo $e->getMessage();
+    throw new PDOException($e->getMessage(), (int)$e->getCode());
+}
+function get($name) {
+    return isset($_GET[$name]) ? $_GET[$name] : null;
+}
+?>
+
+<h1>All Users</h1>
+
+<form action="all_users.php" method="get">
+    Start with letter:
+    <input name="start_letter" type="text" value="<?php echo get("start_letter") ?>">
+    and status is:
+    <select name="status_id">
+        <option value="1" <?php if (get("status_id") == 1) echo 'selected' ?>>Waiting for account validation</option>
+        <option value="2" <?php if (get("status_id") == 2) echo 'selected' ?>>Active account</option>
+    </select>
+    <input type="submit" value="OK">
+</form>
+
+<?php
+$start_letter = htmlspecialchars(get("start_letter"));
+$status_id = (int)get("status_id");
+$sql = "select users.id as user_id, username, email, s.name as status from users join status s on users.status_id = s.id where username like '$start_letter%' and status_id = $status_id order by username";
+$stmt = $pdo->query($sql);
+?>
+<table>
+    <tr>
+        <th>Id</th>
+        <th>Username</th>
+        <th>Email</th>
+        <th>Status</th>
+    </tr>
+    <?php while ($row = $stmt->fetch()) { ?>
+        <tr>
+            <td><?php echo $row['user_id'] ?></td>
+            <td><?php echo $row['username'] ?></td>
+            <td><?php echo $row['email'] ?></td>
+            <td><?php echo $row['status'] ?></td>
+        </tr>
+    <?php } ?>
+</table>
+
+
 </body>
 </html>
